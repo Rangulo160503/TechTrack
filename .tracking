@@ -1,0 +1,14 @@
+# TechTrack — Hallazgos y Seguimiento
+
+## 2026-07-20
+- [FECHA] Sesión iniciada: Monday, July 20, 2026 1:54 PM (UTC-6), verificada con `date`.
+- [HALLAZGO] La máquina de desarrollo solo tiene instalado el SDK .NET 10.0.203 (no hay SDK 8).
+- [HALLAZGO][WEB] .NET 8 (LTS) alcanza fin de soporte el 2026-11-10, junto con .NET 9.
+  Fuentes: dotnet.microsoft.com/platform/support/policy/dotnet-core,
+  devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support.
+- [DECISIÓN] Se adopta .NET 10 LTS (soporte hasta 2028-11-14) en lugar de .NET 8 solicitado
+  originalmente. Justificación: producción no debe nacer sobre runtime a ~4 meses de EOL y el
+  SDK 8 ni siquiera está instalado. La arquitectura y las librerías solicitadas (EF Core,
+  FluentValidation, Serilog, JWT, Swagger) son totalmente compatibles.
+- [ALINEACIÓN] Objetivo principal confirmado: sistema web de gestión de activos tecnológicos.
+  DevOps solo como apoyo (fases finales del plan).

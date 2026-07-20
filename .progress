@@ -1,0 +1,20 @@
+# TechTrack — Registro de Progreso
+
+## 2026-07-20 (lunes, ~13:54 UTC-6)
+
+### Paso 1 — Inicialización del proyecto [COMPLETADO]
+- Fecha registrada mediante `date`: Monday, July 20, 2026 1:54 PM (UTC-6).
+- Workspace vacío verificado: c:\Users\joel\Documents\TCU\TechTrack.
+- Herramientas verificadas:
+  - .NET SDK 10.0.203 (único SDK instalado; runtimes 8.0.26 y 10.0.7 presentes)
+  - Node.js v24.14.1, npm 11.11.0
+  - Docker 29.4.0
+  - Git 2.52.0.windows.1
+- Investigación web: .NET 8 EOL = 2026-11-10; .NET 10 LTS soportado hasta 2028-11-14.
+  => Decisión: construir sobre .NET 10 LTS (registrada en .plan y .tracking).
+- Archivos creados: .cursorrules, .plan, .progress, .tracking, README.md, .gitignore, .editorconfig.
+- Repositorio git inicializado con commit inicial (Conventional Commits).
+
+### Próximo paso
+- Paso 2: Crear estructura de la solución backend (Clean Architecture: Domain, Application,
+  Infrastructure, API + proyectos de tests) con referencias correctas entre capas.

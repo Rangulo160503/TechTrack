@@ -1,0 +1,53 @@
+# TechTrack — Reglas del Proyecto (Cursor Rules)
+
+## Propósito del proyecto
+Sistema web de gestión de activos tecnológicos para el Colegio Técnico Profesional Santa Eulalia.
+Proyecto de Trabajo Comunal Universitario (TCU) — Ingeniería en Sistemas de Computación.
+El objetivo principal es el sistema de inventario tecnológico. DevOps es únicamente apoyo
+(CI/CD, contenerización, automatización), nunca el objetivo del proyecto.
+
+## Stack tecnológico
+- Backend: .NET 10 LTS (decisión justificada: .NET 8 llega a EOL el 2026-11-10; .NET 10 es el LTS
+  vigente con soporte hasta 2028-11 y es el único SDK instalado en la máquina de desarrollo).
+- ASP.NET Core Web API, Entity Framework Core, SQL Server, JWT + Refresh Tokens, Swagger/OpenAPI,
+  FluentValidation, Serilog. AutoMapper solo donde aporte valor real.
+- Frontend: React + Vite + TypeScript + TailwindCSS + React Router + TanStack React Query + Axios +
+  React Hook Form + Zod.
+- DevOps (apoyo): Docker, Docker Compose, GitHub Actions (CI/CD), migraciones automáticas,
+  variables de entorno.
+
+## Arquitectura
+- Clean Architecture con 4 capas: Domain, Application, Infrastructure, Presentation (API).
+- Principios: SOLID, DRY, KISS, Open/Closed para extensibilidad de módulos.
+- Patrones: CQRS (con MediatR donde aporte valor), Repository Pattern, Unit of Work,
+  Dependency Injection nativa de .NET.
+- Nunca mezclar responsabilidades entre capas. Domain no depende de nada;
+  Application solo de Domain; Infrastructure implementa abstracciones de Application/Domain;
+  Presentation orquesta y no contiene lógica de negocio.
+
+## Convenciones de código
+- TODO el código en inglés: variables, métodos, clases, namespaces, tablas, columnas.
+- TODA la documentación en español: README, manuales, comentarios de documentación de alto nivel.
+- Comentarios en código únicamente cuando agreguen valor (intención no obvia, trade-offs).
+- Entidades base: Id, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy, IsActive (soft delete).
+- Commits: Conventional Commits (feat:, fix:, refactor:, docs:, test:, build:, ci:, chore:).
+
+## Seguridad
+- JWT + Refresh Tokens con rotación.
+- Contraseñas SIEMPRE hasheadas (nunca texto plano).
+- RBAC con roles: Administrator, Technician, Viewer (Consulta), Auditor.
+- Auditoría de cambios importantes: usuario, fecha, valores antes/después, acción, IP.
+
+## Alcance — Restricciones estrictas
+NO implementar funcionalidades de: matrícula, notas, asistencia, expedientes estudiantiles,
+información académica ni calificaciones. Pertenecen a plataformas oficiales del MEP.
+
+## Flujo de trabajo del agente
+- Ejecutar `date` al inicio de cada sesión y registrar la fecha en los archivos de seguimiento.
+- Mantener actualizados `.plan`, `.progress` y `.tracking` después de completar cada paso.
+- Mantener el `README.md` actualizado con cada cambio relevante del código.
+- Trabajar un paso a la vez; cada salida del agente corresponde a un paso del plan.
+- Verificar constantemente que el trabajo esté alineado con el objetivo principal:
+  sistema de gestión de activos tecnológicos.
+- Registrar hallazgos importantes en `.tracking`.
+- Calidad de producción: Unit Tests + Integration Tests, código limpio, extensible.

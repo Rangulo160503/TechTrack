@@ -1,0 +1,38 @@
+# .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+.vs/
+artifacts/
+TestResults/
+coverage/
+*.coverage
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+appsettings.*.Local.json
+secrets.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Docker
+docker-volumes/
