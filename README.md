@@ -35,17 +35,23 @@ Permitir a la institución registrar, administrar y dar trazabilidad completa a 
 Clean Architecture con cuatro capas claramente separadas:
 
 ```
+TechTrack.slnx                     # Solución .NET (formato slnx del SDK 10)
 src/
-├── backend/
-│   ├── TechTrack.Domain/          # Entidades, enums, reglas de negocio puras
-│   ├── TechTrack.Application/     # Casos de uso (CQRS), DTOs, validaciones, abstracciones
-│   ├── TechTrack.Infrastructure/  # EF Core, repositorios, identidad, servicios externos
-│   └── TechTrack.Api/             # Presentación: controladores, middleware, configuración
-└── frontend/                      # SPA React + TypeScript
+├── TechTrack.Domain/              # Entidades, enums, eventos, reglas de negocio puras
+├── TechTrack.SharedKernel/        # Bloques reutilizables independientes del dominio
+├── TechTrack.Application/         # Casos de uso (CQRS/MediatR), validaciones, abstracciones
+├── TechTrack.Infrastructure/      # EF Core, repositorios, identidad, servicios externos
+└── TechTrack.Api/                 # Presentación: controladores, middleware, Swagger, Serilog
 tests/
-├── TechTrack.UnitTests/
-└── TechTrack.IntegrationTests/
+├── TechTrack.UnitTests/           # Pruebas unitarias + pruebas de arquitectura
+└── TechTrack.IntegrationTests/    # Pruebas de integración (WebApplicationFactory)
+docs/                              # Documentación del proyecto
+scripts/                           # Scripts de automatización
+docker/                            # Archivos de contenerización
+frontend (se creará en la Fase 4)  # SPA React + TypeScript
 ```
+
+Configuración global: `global.json` (SDK fijado), `Directory.Build.props` (Nullable, warnings como errores, analizadores) y `Directory.Packages.props` (versiones centralizadas de paquetes NuGet).
 
 Principios aplicados: SOLID, DRY, KISS, Open/Closed, CQRS, Repository Pattern, Unit of Work, Dependency Injection.
 
@@ -55,7 +61,7 @@ Principios aplicados: SOLID, DRY, KISS, Open/Closed, CQRS, Repository Pattern, U
 
 | Fase | Estado |
 | --- | --- |
-| 0. Fundación del proyecto | ✅ En curso (Paso 1 completado) |
+| 0. Fundación del proyecto | ✅ Completada (solución backend creada y compilando) |
 | 1. Dominio y persistencia | ⏳ Pendiente |
 | 2. Seguridad y casos de uso | ⏳ Pendiente |
 | 3. Reportes y dashboard | ⏳ Pendiente |

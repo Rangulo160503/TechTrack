@@ -12,3 +12,22 @@
   FluentValidation, Serilog, JWT, Swagger) son totalmente compatibles.
 - [ALINEACIÓN] Objetivo principal confirmado: sistema web de gestión de activos tecnológicos.
   DevOps solo como apoyo (fases finales del plan).
+
+## 2026-07-20 — Paso 2
+- [FECHA] Paso 2 ejecutado: Monday, July 20, 2026 2:09 PM (UTC-6), verificada con `date`.
+- [HALLAZGO] El SDK .NET 10 genera soluciones en el nuevo formato .slnx (TechTrack.slnx),
+  sucesor oficial de .sln; compatible con dotnet CLI, Visual Studio y Rider.
+- [HALLAZGO] `dotnet new webapi` en .NET 10 ya no usa Swashbuckle; se removió
+  Microsoft.AspNetCore.OpenApi (traía Microsoft.OpenApi 2.0.0 con vulnerabilidad NU1903)
+  y se instaló Swashbuckle.AspNetCore 10.2.3 (trae Microsoft.OpenApi 2.7.5 sin vulnerabilidad).
+- [HALLAZGO] En Swashbuckle 10.x / Microsoft.OpenApi 2.x, OpenApiInfo vive en el namespace
+  Microsoft.OpenApi (ya no en Microsoft.OpenApi.Models).
+- [DECISIÓN] LangVersion=latest (C# 14 estable) en lugar de preview: producción no debe
+  depender de características de lenguaje no finalizadas.
+- [DECISIÓN] Central Package Management (Directory.Packages.props) para gobernar versiones
+  de paquetes en un único lugar.
+- [DECISIÓN] MediatR se registra vía marcadores AssemblyReference; tests de arquitectura
+  validan automáticamente que las referencias respetan Clean Architecture.
+- [NOTA] FluentAssertions 8.x emite aviso de licencia Xceed: gratuito para uso no comercial.
+  Este proyecto es TCU sin fines comerciales => uso permitido. Si se desea evitar el aviso,
+  alternativa futura: AwesomeAssertions (fork Apache 2.0).

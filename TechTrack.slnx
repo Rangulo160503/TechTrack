@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TechTrack.Api/TechTrack.Api.csproj" />
+    <Project Path="src/TechTrack.Application/TechTrack.Application.csproj" />
+    <Project Path="src/TechTrack.Domain/TechTrack.Domain.csproj" />
+    <Project Path="src/TechTrack.Infrastructure/TechTrack.Infrastructure.csproj" />
+    <Project Path="src/TechTrack.SharedKernel/TechTrack.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TechTrack.IntegrationTests/TechTrack.IntegrationTests.csproj" />
+    <Project Path="tests/TechTrack.UnitTests/TechTrack.UnitTests.csproj" />
+  </Folder>
+</Solution>

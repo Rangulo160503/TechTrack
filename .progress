@@ -15,6 +15,32 @@
 - Archivos creados: .cursorrules, .plan, .progress, .tracking, README.md, .gitignore, .editorconfig.
 - Repositorio git inicializado con commit inicial (Conventional Commits).
 
+### Paso 2 — Solución backend con Clean Architecture [COMPLETADO]
+- Fecha registrada mediante `date`: Monday, July 20, 2026 2:09 PM (UTC-6).
+- Solución TechTrack.slnx (formato nuevo del SDK 10) con 7 proyectos:
+  - src: TechTrack.Domain, TechTrack.SharedKernel, TechTrack.Application,
+    TechTrack.Infrastructure, TechTrack.Api
+  - tests: TechTrack.UnitTests, TechTrack.IntegrationTests
+- Referencias Clean Architecture verificadas con tests de arquitectura automáticos.
+- Configuración global: global.json (SDK 10.0.203), Directory.Build.props
+  (Nullable, ImplicitUsings, TreatWarningsAsErrors, AnalysisLevel=latest, Deterministic,
+  LangVersion=latest), Directory.Packages.props (Central Package Management).
+- Paquetes: Swashbuckle 10.2.3, Serilog.AspNetCore 10.0.0 (+ sinks Console/File),
+  MediatR 14.2.0, FluentValidation 12.1.1, EF Core 10.0.10 (+ SqlServer + Design),
+  xUnit 2.9.3, FluentAssertions 8.10.0, Mvc.Testing 10.0.10.
+- API arranca con Serilog + Swagger (dev) + health check en /health + HTTPS redirection.
+- Infrastructure: ApplicationDbContext vacío, DesignTimeDbContextFactory (migraciones listas),
+  DependencyInjection con UseSqlServer.
+- Application: DependencyInjection con MediatR; estructura Common/{Behaviors,Interfaces,
+  Validators,Exceptions} y Features.
+- Domain: estructura Common, Entities, ValueObjects, Enums, Events, Interfaces.
+- Validación: dotnet restore OK, dotnet build 0 warnings/0 errors, dotnet test 4/4 passed
+  (3 arquitectura + 1 integración health check).
+- Problema resuelto: template webapi de .NET 10 traía Microsoft.AspNetCore.OpenApi con
+  Microsoft.OpenApi 2.0.0 vulnerable (NU1903); se reemplazó por Swashbuckle. OpenApiInfo
+  ahora vive en namespace Microsoft.OpenApi (breaking change de Microsoft.OpenApi 2.x).
+
 ### Próximo paso
-- Paso 2: Crear estructura de la solución backend (Clean Architecture: Domain, Application,
-  Infrastructure, API + proyectos de tests) con referencias correctas entre capas.
+- Paso 3: Capa Domain — entidad base auditable, entidades del negocio (Asset, Category,
+  Brand, Model, Location, Department, Supplier, Status, User, Role, Permission, Maintenance,
+  MaintenanceHistory, AssetAssignment, AuditLog), enums y eventos de dominio.

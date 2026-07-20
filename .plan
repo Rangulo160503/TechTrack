@@ -15,7 +15,7 @@
 
 ### FASE 0 — Fundación del proyecto
 - [x] Paso 1: Inicialización: fecha, verificación de herramientas, .cursorrules, .plan, .progress, .tracking, README.md inicial, git init, .gitignore, .editorconfig.
-- [ ] Paso 2: Estructura de la solución backend (src/backend): solución .NET, proyectos Domain, Application, Infrastructure, API + proyectos de tests. Referencias entre capas.
+- [x] Paso 2: Estructura de la solución backend: solución .NET (TechTrack.slnx), proyectos Domain, SharedKernel, Application, Infrastructure, Api + UnitTests/IntegrationTests. Referencias entre capas, CPM, global.json, Directory.Build.props, Serilog, Swagger, health checks, DbContext vacío, tests de arquitectura.
 
 ### FASE 1 — Backend: Dominio y Persistencia
 - [ ] Paso 3: Capa Domain: entidad base auditable, entidades (Asset, Category, Brand, Model, Location, Department, Supplier, Status, User, Role, Permission, Maintenance, MaintenanceHistory, AssetAssignment, AuditLog), enums, excepciones de dominio.

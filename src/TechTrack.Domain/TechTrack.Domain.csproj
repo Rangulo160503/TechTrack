@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TechTrack.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>
