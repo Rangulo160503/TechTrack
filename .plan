@@ -18,7 +18,8 @@
 - [x] Paso 2: Estructura de la solución backend: solución .NET (TechTrack.slnx), proyectos Domain, SharedKernel, Application, Infrastructure, Api + UnitTests/IntegrationTests. Referencias entre capas, CPM, global.json, Directory.Build.props, Serilog, Swagger, health checks, DbContext vacío, tests de arquitectura.
 
 ### FASE 1 — Backend: Dominio y Persistencia
-- [ ] Paso 3: Capa Domain: entidad base auditable, entidades (Asset, Category, Brand, Model, Location, Department, Supplier, Status, User, Role, Permission, Maintenance, MaintenanceHistory, AssetAssignment, AuditLog), enums, excepciones de dominio.
+- [x] Paso 3A: Infraestructura de la capa Domain: Entity, AuditableEntity, AggregateRoot (eventos de dominio), ValueObject, DomainException, Guard; VOs (Email, PhoneNumber, AssetCode, SerialNumber, PersonName, LocationCode); enums estables; catálogos (Category, Brand, Model, Department, Supplier, Location, Role, Permission, User) + 124 pruebas unitarias nuevas.
+- [ ] Paso 3B: Entidades restantes del dominio: Asset, Maintenance, MaintenanceHistory, AssetAssignment, AuditLog + eventos de dominio concretos.
 - [ ] Paso 4: Capa Application: abstracciones (IRepository, IUnitOfWork, IApplicationDbContext, ICurrentUserService, IDateTimeProvider), DTOs base, comportamiento de validación.
 - [ ] Paso 5: Capa Infrastructure: DbContext, configuraciones EF Core (Fluent API) por entidad, interceptor de auditoría, repositorios genéricos + específicos, Unit of Work.
 - [ ] Paso 6: Migración inicial de base de datos + seed de datos (roles, estados, categorías base, usuario admin).

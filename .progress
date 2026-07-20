@@ -40,7 +40,30 @@
   Microsoft.OpenApi 2.0.0 vulnerable (NU1903); se reemplazó por Swashbuckle. OpenApiInfo
   ahora vive en namespace Microsoft.OpenApi (breaking change de Microsoft.OpenApi 2.x).
 
+### Paso 3A — Infraestructura de la capa Domain [COMPLETADO]
+- Fecha registrada mediante `date`: Monday, July 20, 2026 2:38 PM (UTC-6).
+- Common: Entity (igualdad por Id), AuditableEntity (CreatedAt/UpdatedAt/CreatedBy/UpdatedBy/
+  IsActive con soft delete), AggregateRoot (eventos de dominio: colección privada,
+  AddDomainEvent/RemoveDomainEvent/ClearDomainEvents), ValueObject (igualdad estructural),
+  DomainException, IDomainEvent, Guard (validaciones DRY).
+- Events: DomainEvent (record base con EventId + OccurredOnUtc).
+- Interfaces: IAggregateRoot (marcador para restringir repositorios genéricos).
+- Value Objects (inmutables, validación en constructor, igualdad estructural, GeneratedRegex):
+  Email, PhoneNumber, AssetCode, SerialNumber, PersonName, LocationCode.
+- Enums estables con valores explícitos: AssetStatus, MaintenanceType, MaintenancePriority,
+  MaintenanceResult, UserStatus, RoleType.
+- Entidades de catálogo (ctor protegido para EF, encapsulación total, sin setters públicos):
+  Category, Brand, Model, Department, Supplier, Location, Role (permisos encapsulados),
+  Permission (formato recurso.accion), User (username normalizado, solo hash de contraseña,
+  transiciones de estado Lock/Unlock/MarkAsInactive/Reactivate con DomainException).
+- Decisión: NO se implementó Result<T>; el dominio usa excepciones de forma consistente
+  (ArgumentException para entrada, DomainException para reglas). Dos canales de error
+  serían inconsistentes; se puede introducir en Application si aporta valor.
+- Pruebas: 124 nuevas (value objects, igualdad, eventos, entidades, transiciones).
+- Validación: dotnet restore OK, build 0 warnings/0 errors, 128/128 tests passed.
+- Problema resuelto: colisión de namespaces en ArchitectureTests
+  (TechTrack.UnitTests.Domain vs TechTrack.Domain) — se calificó con global::.
+
 ### Próximo paso
-- Paso 3: Capa Domain — entidad base auditable, entidades del negocio (Asset, Category,
-  Brand, Model, Location, Department, Supplier, Status, User, Role, Permission, Maintenance,
-  MaintenanceHistory, AssetAssignment, AuditLog), enums y eventos de dominio.
+- Paso 3B: Entidades restantes: Asset, Maintenance, MaintenanceHistory, AssetAssignment,
+  AuditLog + eventos de dominio concretos.

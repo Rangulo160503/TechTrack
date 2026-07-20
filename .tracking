@@ -31,3 +31,19 @@
 - [NOTA] FluentAssertions 8.x emite aviso de licencia Xceed: gratuito para uso no comercial.
   Este proyecto es TCU sin fines comerciales => uso permitido. Si se desea evitar el aviso,
   alternativa futura: AwesomeAssertions (fork Apache 2.0).
+
+## 2026-07-20 — Paso 3A
+- [FECHA] Paso 3A ejecutado: Monday, July 20, 2026 2:38 PM (UTC-6), verificada con `date`.
+- [DECISIÓN] Jerarquía: Entity -> AuditableEntity -> AggregateRoot. Los eventos de dominio
+  viven en AggregateRoot (DDD: solo las raíces publican eventos).
+- [DECISIÓN] IDomainEvent no depende de MediatR: el dominio queda libre de librerías externas;
+  Application adaptará los eventos al publicarlos.
+- [DECISIÓN] Se omitió Result<T> en el dominio: canal único de errores vía excepciones
+  (ArgumentException = entrada inválida, DomainException = regla de negocio violada).
+- [DECISIÓN] User tiene un único RoleId (KISS); cubre los 4 roles requeridos y puede
+  evolucionar a multi-rol sin romper la API del dominio.
+- [DECISIÓN] Value objects usan GeneratedRegex (source generators) por rendimiento.
+- [HALLAZGO] El namespace del proyecto de tests (TechTrack.UnitTests.Domain.*) colisiona con
+  TechTrack.Domain al usar referencias relativas; resuelto con global:: en ArchitectureTests.
+- [ALINEACIÓN] Dominio cubre catálogos y seguridad base; sigue alineado al objetivo:
+  inventario de activos tecnológicos (Asset llega en 3B).

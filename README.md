@@ -62,7 +62,7 @@ Principios aplicados: SOLID, DRY, KISS, Open/Closed, CQRS, Repository Pattern, U
 | Fase | Estado |
 | --- | --- |
 | 0. Fundación del proyecto | ✅ Completada (solución backend creada y compilando) |
-| 1. Dominio y persistencia | ⏳ Pendiente |
+| 1. Dominio y persistencia | 🚧 En curso (base del dominio, value objects, enums y catálogos listos) |
 | 2. Seguridad y casos de uso | ⏳ Pendiente |
 | 3. Reportes y dashboard | ⏳ Pendiente |
 | 4. Frontend | ⏳ Pendiente |

@@ -12,7 +12,7 @@ public class ArchitectureTests
     [Fact]
     public void Domain_ShouldNotDependOnAnyOtherProject()
     {
-        var references = Domain.AssemblyReference.Assembly
+        var references = global::TechTrack.Domain.AssemblyReference.Assembly
             .GetReferencedAssemblies()
             .Select(assembly => assembly.Name);
 
@@ -22,7 +22,7 @@ public class ArchitectureTests
     [Fact]
     public void SharedKernel_ShouldNotDependOnAnyOtherProject()
     {
-        var references = SharedKernel.AssemblyReference.Assembly
+        var references = global::TechTrack.SharedKernel.AssemblyReference.Assembly
             .GetReferencedAssemblies()
             .Select(assembly => assembly.Name);
 
@@ -38,7 +38,7 @@ public class ArchitectureTests
             "TechTrack.SharedKernel"
         };
 
-        var solutionReferences = Application.AssemblyReference.Assembly
+        var solutionReferences = global::TechTrack.Application.AssemblyReference.Assembly
             .GetReferencedAssemblies()
             .Select(assembly => assembly.Name)
             .Where(name => name!.StartsWith(SolutionPrefix));
