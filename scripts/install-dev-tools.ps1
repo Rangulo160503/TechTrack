@@ -16,6 +16,14 @@ function Assert-Winget {
     }
 }
 
+function Test-DotNetSdk10 {
+    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+        return $false
+    }
+    $sdks = & dotnet --list-sdks 2>$null
+    return ("$sdks" -match '(^|\s)10\.')
+}
+
 function Install-WingetPackage {
     param(
         [Parameter(Mandatory)][string]$Id,
@@ -33,7 +41,7 @@ function Install-WingetPackage {
 
     winget install --id $Id --exact --accept-package-agreements --accept-source-agreements
     if ($LASTEXITCODE -ne 0) {
-        Write-Warning "Fallo la instalacion de $Id (codigo $LASTEXITCODE)."
+        Write-Warning "Fallo la instalacion de $Id (codigo $LASTEXITCODE). Si ya funciona a mano, podes ignorarlo."
     }
 }
 
@@ -48,13 +56,25 @@ else {
 }
 
 Install-WingetPackage -Id "Git.Git" -Label "Git"
-Install-WingetPackage -Id "Microsoft.DotNet.SDK.10" -Label ".NET SDK 10"
+
+Write-Host ""
+Write-Host "==> .NET SDK 10 (Microsoft.DotNet.SDK.10)" -ForegroundColor Cyan
+if (Test-DotNetSdk10) {
+    Write-Host "    Ya hay un SDK 10 en PATH. Se omite winget." -ForegroundColor DarkGray
+}
+else {
+    Install-WingetPackage -Id "Microsoft.DotNet.SDK.10" -Label ".NET SDK 10"
+}
+
 Install-WingetPackage -Id "OpenJS.NodeJS.LTS" -Label "Node.js LTS"
 
 if (-not $CoreOnly) {
     Install-WingetPackage -Id "Cloudflare.cloudflared" -Label "cloudflared"
     Install-WingetPackage -Id "Docker.DockerDesktop" -Label "Docker Desktop"
-    Install-WingetPackage -Id "Microsoft.SQLServer.2022.Express" -Label "SQL Server 2022 Express"
+    Write-Host ""
+    Write-Host "==> SQL Server Express (opcional)" -ForegroundColor Cyan
+    Write-Host "    Se omite por defecto: el API puede usar InMemory / LocalDB ya instalado." -ForegroundColor DarkGray
+    Write-Host "    Si lo necesitas: winget install -e --id Microsoft.SQLServer.2022.Express" -ForegroundColor DarkGray
 }
 
 Write-Host ""

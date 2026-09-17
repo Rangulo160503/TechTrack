@@ -7,7 +7,29 @@ $ErrorActionPreference = "Stop"
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
     [System.Environment]::GetEnvironmentVariable("Path", "User")
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-Set-Location $root
+Set-Location -LiteralPath $root
+
+function Stop-ListenersOnPorts {
+    param([int[]]$Ports)
+
+    foreach ($port in $Ports) {
+        $pids = @()
+        try {
+            $pids = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty OwningProcess -Unique
+        }
+        catch {
+            $pids = @()
+        }
+
+        foreach ($processId in $pids) {
+            if ($processId -and $processId -gt 0) {
+                Write-Host "Liberando puerto $port (PID $processId)..." -ForegroundColor Yellow
+                Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
 
 function Start-DevWindow {
     param(
@@ -16,22 +38,34 @@ function Start-DevWindow {
         [Parameter(Mandatory)][string]$Command
     )
 
-    $cmd = "Set-Location -LiteralPath '$WorkingDirectory'; `$Host.UI.RawUI.WindowTitle = '$Title'; $Command"
+    # Single-quoted here-string avoids breaking on spaces in paths.
+    $script = @"
+`$Host.UI.RawUI.WindowTitle = '$Title'
+Set-Location -LiteralPath '$WorkingDirectory'
+$Command
+"@
+
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($script))
     Start-Process -FilePath "powershell.exe" -ArgumentList @(
         "-NoExit",
         "-NoProfile",
         "-ExecutionPolicy", "Bypass",
-        "-Command",
-        $cmd
+        "-EncodedCommand",
+        $encoded
     )
 }
 
 Write-Host "TechTrack - arranque" -ForegroundColor Cyan
+Write-Host "Raiz: $root"
+
+# Previous runs leave API/Vite holding ports; free them first.
+Stop-ListenersOnPorts -Ports @(5173, 5176)
+Start-Sleep -Seconds 1
 
 $frontendPath = Join-Path $root "frontend"
-if (-not (Test-Path (Join-Path $frontendPath "node_modules"))) {
+if (-not (Test-Path -LiteralPath (Join-Path $frontendPath "node_modules"))) {
     Write-Host "npm install (primera vez)..." -ForegroundColor Yellow
-    Push-Location $frontendPath
+    Push-Location -LiteralPath $frontendPath
     npm install
     if ($LASTEXITCODE -ne 0) {
         throw "npm install fallo."
@@ -56,10 +90,13 @@ Start-DevWindow -Title "TechTrack Presence" -WorkingDirectory $root `
 
 Start-Sleep -Seconds 3
 
+# -File + EncodedCommand wrapper handles paths with spaces (e.g. "New folder").
 Start-DevWindow -Title "TechTrack Tunnel" -WorkingDirectory $root `
-    -Command "powershell.exe -ExecutionPolicy Bypass -File `"$tunnelScript`""
+    -Command "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$tunnelScript`""
 
 Write-Host ""
 Write-Host "Cuando el tunel arranque, abre el archivo:" -ForegroundColor Green
 Write-Host "  $(Join-Path $root 'PUBLIC_URL.txt')"
 Write-Host "Ahi esta el link para los telefonos."
+Write-Host ""
+Write-Host "Tip: evita carpetas con espacios. Mejor: C:\Users\<tu-usuario>\Documents\TechTrack"
