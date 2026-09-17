@@ -1,13 +1,12 @@
-# Expone el frontend (5173) con Cloudflare Quick Tunnel.
-# Guarda el link público en PUBLIC_URL.txt (raíz del repo) para compartir por teléfono.
+# Expose frontend (5173) with Cloudflare Quick Tunnel.
+# Saves public link to PUBLIC_URL.txt at repo root.
 
 $ErrorActionPreference = "Stop"
-$root = Resolve-Path (Join-Path $PSScriptRoot "..")
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $urlFile = Join-Path $root "PUBLIC_URL.txt"
 
-$cloudflared = Get-Command cloudflared -ErrorAction SilentlyContinue
-if (-not $cloudflared) {
-    Write-Host "cloudflared no está en PATH. Ejecutá antes: .\scripts\install-dev-tools.ps1"
+if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
+    Write-Host "cloudflared no esta en PATH. Ejecuta antes: .\scripts\install-dev-tools.ps1"
     exit 1
 }
 
@@ -25,12 +24,12 @@ for ($i = 0; $i -lt 60; $i++) {
 }
 
 if (-not $ready) {
-    Write-Host "Vite no respondió a tiempo. Abrí otra terminal: cd frontend; npm run dev"
+    Write-Host "Vite no respondio a tiempo. En otra terminal: cd frontend; npm run dev"
     exit 1
 }
 
-"Esperando URL de Cloudflare..." | Set-Content -Path $urlFile -Encoding utf8
-Write-Host "Túnel activo. El link se guardará en: $urlFile"
+Set-Content -Path $urlFile -Value "Esperando URL de Cloudflare..." -Encoding ascii
+Write-Host "Tunel activo. El link se guardara en: $urlFile"
 Write-Host ""
 
 & cloudflared tunnel --url http://127.0.0.1:5173 2>&1 | ForEach-Object {
@@ -39,12 +38,13 @@ Write-Host ""
 
     if ($line -match '(https://[a-zA-Z0-9-]+\.trycloudflare\.com)') {
         $publicLive = "$($Matches[1])/live"
-        @(
+        $content = @(
             $publicLive
             ""
-            "Compartí este link desde el teléfono (misma sesión del túnel)."
-            "Si reiniciás el túnel, el link cambia: volvé a abrir este archivo."
-        ) | Set-Content -Path $urlFile -Encoding utf8
+            "Comparte este link desde el telefono (misma sesion del tunel)."
+            "Si reinicias el tunel, el link cambia: vuelve a abrir este archivo."
+        )
+        Set-Content -Path $urlFile -Value $content -Encoding ascii
 
         Write-Host ""
         Write-Host "URL guardada en PUBLIC_URL.txt:" -ForegroundColor Green
