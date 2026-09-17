@@ -36,3 +36,19 @@ Thumbs.db
 
 # Docker
 docker-volumes/
+
+# Markdown: solo se versiona el README de la raíz del repo
+*.md
+!/README.md
+
+# Link público de Cloudflare (se regenera en cada arranque)
+PUBLIC_URL.txt
+
+# Cursor / flujo del agente (NO deben ir al repositorio final del TCU)
+# Preparado: cuando el usuario avise, ejecutar scripts/exclude-cursor-agent-files.ps1
+# para sacarlos del índice de Git. Hasta entonces siguen versionados localmente.
+.cursorrules
+.plan
+.progress
+.tracking
+.cursor/

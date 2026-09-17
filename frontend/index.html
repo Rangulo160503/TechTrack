@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('techtrack.theme');
+          if (t !== 'light' && t !== 'dark') t = 'light';
+          document.documentElement.dataset.theme = t;
+          document.documentElement.style.colorScheme = t;
+          // Accent hue for this page load (changes on every refresh).
+          var pools = [[0, 35], [195, 250], [265, 320], [330, 355]];
+          var pool = pools[Math.floor(Math.random() * pools.length)];
+          var hue = pool[0] + Math.floor(Math.random() * (pool[1] - pool[0] + 1));
+          document.documentElement.style.setProperty('--tt-accent-hue', String(hue));
+          window.__TT_ACCENT_HUE__ = hue;
+        } catch (e) {}
+      })();
+    </script>
+    <title>TechTrack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

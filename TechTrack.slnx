@@ -4,6 +4,7 @@
     <Project Path="src/TechTrack.Application/TechTrack.Application.csproj" />
     <Project Path="src/TechTrack.Domain/TechTrack.Domain.csproj" />
     <Project Path="src/TechTrack.Infrastructure/TechTrack.Infrastructure.csproj" />
+    <Project Path="src/TechTrack.PresenceClient/TechTrack.PresenceClient.csproj" />
     <Project Path="src/TechTrack.SharedKernel/TechTrack.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using TechTrack.Application.Features.NetworkPresence.Services;
 
 namespace TechTrack.Application;
 
@@ -11,6 +12,8 @@ public static class DependencyInjection
     {
         services.AddMediatR(configuration =>
             configuration.RegisterServicesFromAssembly(AssemblyReference.Assembly));
+
+        services.AddScoped<NetworkPresenceOfflineService>();
 
         return services;
     }
