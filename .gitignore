@@ -41,6 +41,9 @@ docker-volumes/
 *.md
 !/README.md
 
+# Logs de arranque local
+logs/
+
 # Link público de Cloudflare (se regenera en cada arranque)
 PUBLIC_URL.txt
 
