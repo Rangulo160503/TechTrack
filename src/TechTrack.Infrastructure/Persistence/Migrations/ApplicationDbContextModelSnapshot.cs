@@ -39,6 +39,9 @@ namespace TechTrack.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("FirstSeenAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("HardwareProfileJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Hostname")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -65,6 +68,10 @@ namespace TechTrack.Infrastructure.Persistence.Migrations
                     b.Property<string>("MacAddress")
                         .HasMaxLength(17)
                         .HasColumnType("nvarchar(17)");
+
+                    b.Property<string>("OsVersion")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");

@@ -8,6 +8,8 @@ echo ========================================
 echo  TechTrack - INSTALAR (PC nueva)
 echo ========================================
 echo  Instala: Git, .NET 10, Node.js, cloudflared
+echo  NO instala SQL Server ni Docker.
+echo  La base es un archivo SQLite (se crea sola).
 echo ========================================
 echo.
 

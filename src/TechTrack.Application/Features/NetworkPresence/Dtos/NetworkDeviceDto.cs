@@ -9,4 +9,6 @@ public sealed record NetworkDeviceDto(
     DateTime FirstSeenAt,
     DateTime LastSeenAt,
     bool IsOnline,
-    string LastSeenByAgentId);
+    string LastSeenByAgentId,
+    string? OsVersion = null,
+    string? HardwareProfileJson = null);

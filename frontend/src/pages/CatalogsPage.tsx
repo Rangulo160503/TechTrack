@@ -25,9 +25,11 @@ export function CatalogsPage() {
     <div className="px-4 pb-4 pt-3 md:px-8 md:pt-5">
       <p className="bank-section-title">Referencias</p>
       <h1 className="mt-1 font-display text-2xl font-bold tracking-[-0.03em] md:text-[2rem]">
-        Catálogos
+        Catálogos del inventario
       </h1>
-      <p className="mt-1 text-sm text-mute">Derivados del inventario actual</p>
+      <p className="mt-1 text-sm text-mute">
+        Derivados del inventario recompilado desde Historial (vendor, tipo, última clase)
+      </p>
 
       <CatalogBlock
         title="Categorías"

@@ -58,7 +58,9 @@ public sealed class IngestNetworkPresenceCommandHandler(
                     observation.Hostname,
                     observation.Vendor,
                     agentId,
-                    seenAt);
+                    seenAt,
+                    observation.OsVersion,
+                    observation.HardwareProfileJson);
                 await repository.AddAsync(device, cancellationToken);
                 createdCount++;
             }
@@ -70,7 +72,9 @@ public sealed class IngestNetworkPresenceCommandHandler(
                     observation.Hostname,
                     observation.Vendor,
                     agentId,
-                    seenAt);
+                    seenAt,
+                    observation.OsVersion,
+                    observation.HardwareProfileJson);
             }
 
             var dto = device.ToDto();

@@ -27,6 +27,12 @@ secrets.json
 # Logs
 logs/
 *.log
+
+# SQLite local (sobrevive reinicios; no versionar)
+**/data/*.db
+**/data/*.db-*
+*.db
+!**/data/.gitkeep
 npm-debug.log*
 
 # OS / Editor
@@ -55,3 +61,7 @@ PUBLIC_URL.txt
 .progress
 .tracking
 .cursor/
+
+smtp-password.local.txt
+**/smtp-password.local.txt
+

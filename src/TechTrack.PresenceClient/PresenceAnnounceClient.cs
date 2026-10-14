@@ -29,7 +29,9 @@ public sealed class PresenceAnnounceClient(
                 ipAddress = host.IpAddress,
                 macAddress = host.MacAddress,
                 hostname = host.Hostname,
-                vendor = host.Vendor
+                vendor = host.Vendor,
+                osVersion = host.OsVersion,
+                hardwareProfileJson = host.HardwareProfileJson
             }).ToArray()
         };
 

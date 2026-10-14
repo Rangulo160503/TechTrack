@@ -14,6 +14,7 @@ public class NetworkDevice : AggregateRoot
     public const int HostnameMaxLength = 255;
     public const int VendorMaxLength = 200;
     public const int AgentIdMaxLength = 100;
+    public const int OsVersionMaxLength = 200;
 
     public string IpAddress { get; private set; }
 
@@ -22,6 +23,12 @@ public class NetworkDevice : AggregateRoot
     public string? Hostname { get; private set; }
 
     public string? Vendor { get; private set; }
+
+    /// <summary>Ej. Windows 11 Pro 10.0.26200 (reportado por Presence Client).</summary>
+    public string? OsVersion { get; private set; }
+
+    /// <summary>JSON de componentes (CPU, RAM, discos…) para troubleshooting.</summary>
+    public string? HardwareProfileJson { get; private set; }
 
     public DateTime FirstSeenAt { get; private set; }
 
@@ -42,6 +49,8 @@ public class NetworkDevice : AggregateRoot
         string? macAddress,
         string? hostname,
         string? vendor,
+        string? osVersion,
+        string? hardwareProfileJson,
         string agentId,
         DateTime seenAtUtc)
         : base(Guid.NewGuid())
@@ -50,6 +59,8 @@ public class NetworkDevice : AggregateRoot
         MacAddress = NormalizeMac(macAddress);
         Hostname = Guard.AgainstTooLongOptional(hostname, HostnameMaxLength, nameof(hostname));
         Vendor = Guard.AgainstTooLongOptional(vendor, VendorMaxLength, nameof(vendor));
+        OsVersion = Guard.AgainstTooLongOptional(osVersion, OsVersionMaxLength, nameof(osVersion));
+        HardwareProfileJson = NormalizeProfile(hardwareProfileJson);
         LastSeenByAgentId = Guard.AgainstNullOrWhiteSpace(agentId, AgentIdMaxLength, nameof(agentId));
         FirstSeenAt = seenAtUtc;
         LastSeenAt = seenAtUtc;
@@ -64,8 +75,10 @@ public class NetworkDevice : AggregateRoot
         string? hostname,
         string? vendor,
         string agentId,
-        DateTime seenAtUtc) =>
-        new(ipAddress, macAddress, hostname, vendor, agentId, seenAtUtc);
+        DateTime seenAtUtc,
+        string? osVersion = null,
+        string? hardwareProfileJson = null) =>
+        new(ipAddress, macAddress, hostname, vendor, osVersion, hardwareProfileJson, agentId, seenAtUtc);
 
     public void MarkSeen(
         string ipAddress,
@@ -73,7 +86,9 @@ public class NetworkDevice : AggregateRoot
         string? hostname,
         string? vendor,
         string agentId,
-        DateTime seenAtUtc)
+        DateTime seenAtUtc,
+        string? osVersion = null,
+        string? hardwareProfileJson = null)
     {
         IpAddress = NormalizeIp(ipAddress);
 
@@ -85,11 +100,34 @@ public class NetworkDevice : AggregateRoot
 
         Hostname = Guard.AgainstTooLongOptional(hostname, HostnameMaxLength, nameof(hostname)) ?? Hostname;
         Vendor = Guard.AgainstTooLongOptional(vendor, VendorMaxLength, nameof(vendor)) ?? Vendor;
+        if (!string.IsNullOrWhiteSpace(osVersion))
+        {
+            OsVersion = Guard.AgainstTooLongOptional(osVersion, OsVersionMaxLength, nameof(osVersion));
+        }
+
+        var profile = NormalizeProfile(hardwareProfileJson);
+        if (profile is not null)
+        {
+            HardwareProfileJson = profile;
+        }
+
         LastSeenByAgentId = Guard.AgainstNullOrWhiteSpace(agentId, AgentIdMaxLength, nameof(agentId));
         LastSeenAt = seenAtUtc;
         IsOnline = true;
 
         AddDomainEvent(new DeviceSeenEvent(Id, IpAddress, MacAddress, Hostname, seenAtUtc));
+    }
+
+    private static string? NormalizeProfile(string? hardwareProfileJson)
+    {
+        if (string.IsNullOrWhiteSpace(hardwareProfileJson))
+        {
+            return null;
+        }
+
+        return hardwareProfileJson.Length > 8000
+            ? hardwareProfileJson[..8000]
+            : hardwareProfileJson;
     }
 
     public void MarkOffline(DateTime offlineAtUtc)

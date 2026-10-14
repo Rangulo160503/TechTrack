@@ -29,4 +29,20 @@ public abstract class AuditableEntity : Entity
     public void Activate() => IsActive = true;
 
     public void Deactivate() => IsActive = false;
+
+    /// <summary>Usado por infraestructura al insertar la entidad.</summary>
+    public void StampCreated(DateTime utcNow, string by)
+    {
+        CreatedAt = utcNow;
+        UpdatedAt = utcNow;
+        CreatedBy = by ?? string.Empty;
+        UpdatedBy = by ?? string.Empty;
+    }
+
+    /// <summary>Usado por infraestructura al actualizar la entidad.</summary>
+    public void StampUpdated(DateTime utcNow, string by)
+    {
+        UpdatedAt = utcNow;
+        UpdatedBy = by ?? string.Empty;
+    }
 }

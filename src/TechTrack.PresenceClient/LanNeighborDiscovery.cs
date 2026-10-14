@@ -54,22 +54,37 @@ public sealed partial class LanNeighborDiscovery(ILogger<LanNeighborDiscovery> l
             self.IpAddress,
             subnetHosts.Count);
 
-        MergeArpTable(Upsert);
+        // Solo hosts que responden ping ahora. ARP solo enriquece MAC (no cuenta como "en red").
+        var arpMacs = ReadArpMacTable();
+        var reachable = await PingSweepReachableAsync(
+            subnetHosts,
+            pingTimeoutMs,
+            maxConcurrent,
+            cancellationToken);
 
-        await PingSweepBestEffortAsync(subnetHosts, pingTimeoutMs, maxConcurrent, cancellationToken);
-        MergeArpTable(Upsert);
-
-        await TimedSendArpFillAsync(subnetHosts, byIp, Upsert, cancellationToken);
-        MergeArpTable(Upsert);
+        foreach (var ip in reachable)
+        {
+            arpMacs.TryGetValue(ip, out var mac);
+            Upsert(ip, mac, null, GuessVendor(mac));
+        }
 
         await MdnsPeekAsync(Upsert, cancellationToken);
+
+        // mDNS puede sugerir IPs; descartar las que no respondieron ping.
+        var stale = byIp.Keys.Where(ip => !reachable.Contains(ip)).ToList();
+        foreach (var ip in stale)
+        {
+            byIp.Remove(ip);
+        }
 
         var results = byIp.Values
             .Select(h => h with { Vendor = h.Vendor ?? GuessVendor(h.MacAddress) })
             .OrderBy(h => h.IpAddress, StringComparer.Ordinal)
             .ToList();
 
-        logger.LogInformation("Neighbor scan found {Count} host(s)", results.Count);
+        logger.LogInformation(
+            "Neighbor scan found {Count} live host(s) (ping-confirmed)",
+            results.Count);
         return results;
     }
 
@@ -79,71 +94,29 @@ public sealed partial class LanNeighborDiscovery(ILogger<LanNeighborDiscovery> l
             || current == candidate
             || IPAddress.TryParse(current, out _));
 
-    private static async Task TimedSendArpFillAsync(
-        IReadOnlyList<string> hosts,
-        Dictionary<string, SelfHostInfo> already,
-        Action<string, string?, string?, string?> upsert,
-        CancellationToken cancellationToken)
-    {
-        // Only probe IPs we don't already know, with a hard budget so the cycle stays responsive.
-        var missing = hosts.Where(ip => !already.ContainsKey(ip)).ToList();
-        using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        budget.CancelAfter(TimeSpan.FromSeconds(8));
-
-        using var gate = new SemaphoreSlim(32);
-        try
-        {
-            var tasks = missing.Select(async ip =>
-            {
-                if (budget.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                await gate.WaitAsync(budget.Token);
-                try
-                {
-                    var mac = await Task.Run(() =>
-                    {
-                        TrySendArp(ip, out var value);
-                        return value;
-                    }, budget.Token);
-
-                    if (mac is not null)
-                    {
-                        upsert(ip, mac, null, GuessVendor(mac));
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                finally
-                {
-                    gate.Release();
-                }
-            });
-
-            await Task.WhenAll(tasks);
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
-    private static async Task PingSweepBestEffortAsync(
+    private static async Task<HashSet<string>> PingSweepReachableAsync(
         IReadOnlyList<string> hosts,
         int pingTimeoutMs,
         int maxConcurrent,
         CancellationToken cancellationToken)
     {
+        var reachable = new HashSet<string>(StringComparer.Ordinal);
         using var gate = new SemaphoreSlim(Math.Clamp(maxConcurrent, 8, 128));
+        var timeout = Math.Clamp(pingTimeoutMs, 50, 500);
         var tasks = hosts.Select(async ip =>
         {
             await gate.WaitAsync(cancellationToken);
             try
             {
                 using var ping = new Ping();
-                await ping.SendPingAsync(ip, Math.Clamp(pingTimeoutMs, 50, 500));
+                var reply = await ping.SendPingAsync(ip, timeout);
+                if (reply.Status == IPStatus.Success)
+                {
+                    lock (reachable)
+                    {
+                        reachable.Add(ip);
+                    }
+                }
             }
             catch (PingException)
             {
@@ -155,10 +128,12 @@ public sealed partial class LanNeighborDiscovery(ILogger<LanNeighborDiscovery> l
         });
 
         await Task.WhenAll(tasks);
+        return reachable;
     }
 
-    private static void MergeArpTable(Action<string, string?, string?, string?> upsert)
+    private static Dictionary<string, string> ReadArpMacTable()
     {
+        var map = new Dictionary<string, string>(StringComparer.Ordinal);
         try
         {
             var startInfo = new ProcessStartInfo
@@ -173,7 +148,7 @@ public sealed partial class LanNeighborDiscovery(ILogger<LanNeighborDiscovery> l
             using var process = Process.Start(startInfo);
             if (process is null)
             {
-                return;
+                return map;
             }
 
             var output = process.StandardOutput.ReadToEnd();
@@ -193,13 +168,15 @@ public sealed partial class LanNeighborDiscovery(ILogger<LanNeighborDiscovery> l
                     continue;
                 }
 
-                upsert(ip, mac, null, GuessVendor(mac));
+                map[ip] = mac;
             }
         }
         catch
         {
             // Best-effort.
         }
+
+        return map;
     }
 
     private static async Task MdnsPeekAsync(

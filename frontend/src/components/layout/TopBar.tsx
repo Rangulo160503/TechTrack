@@ -1,24 +1,25 @@
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
 import { useTheme } from '../../theme/ThemeProvider'
 import { BrandMark } from '../brand/BrandMark'
 import { IconMoon, IconSearch, IconSun } from '../brand/Icons'
+import { pageTitles } from './nav'
 
-const titles: Record<string, string> = {
-  '/': 'Inicio',
-  '/live': 'En vivo',
-  '/assets': 'Activos',
-  '/maintenance': 'Mantenimiento',
-  '/catalogs': 'Catálogos',
-  '/reports': 'Reportes',
-  '/more': 'Más',
-  '/profile': 'Cuenta',
+const titles = pageTitles
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 'TT'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
 export function TopBar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [query, setQuery] = useState(() => new URLSearchParams(location.search).get('q') ?? '')
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
@@ -100,8 +101,9 @@ export function TopBar() {
             to="/profile"
             className="grid h-9 min-w-9 place-items-center border border-line px-2 text-[0.7rem] font-bold tracking-[0.08em] text-foam md:h-10"
             aria-label="Cuenta"
+            title={user?.fullName ?? 'Cuenta'}
           >
-            JE
+            {initials(user?.fullName ?? user?.username ?? 'TT')}
           </Link>
         </div>
       </div>

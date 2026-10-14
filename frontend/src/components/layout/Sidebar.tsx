@@ -1,21 +1,29 @@
 import { NavLink } from 'react-router-dom'
-import { useTheme } from '../../theme/ThemeProvider'
 import { BrandMark } from '../brand/BrandMark'
+import { primaryNav, profileNav, secondaryNav, type NavItem } from './nav'
 
-const links = [
-  { to: '/', label: 'Inicio', end: true },
-  { to: '/live', label: 'En vivo' },
-  { to: '/assets', label: 'Activos' },
-  { to: '/maintenance', label: 'Mantenimiento' },
-  { to: '/catalogs', label: 'Catálogos' },
-  { to: '/reports', label: 'Reportes' },
-]
+function NavItemLink({ item }: { item: NavItem }) {
+  return (
+    <NavLink
+      to={item.to}
+      end={item.end}
+      className={({ isActive }) =>
+        [
+          'block border-l-2 px-3 py-2 text-[0.8125rem] leading-snug transition-colors',
+          isActive
+            ? 'border-signal bg-ledger font-semibold text-foam'
+            : 'border-transparent font-medium text-mute hover:border-line hover:text-foam',
+        ].join(' ')
+      }
+    >
+      {item.label}
+    </NavLink>
+  )
+}
 
 export function Sidebar() {
-  const { theme, toggleTheme } = useTheme()
-
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[15.5rem] flex-col border-r border-line bg-rail text-foam md:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[17rem] flex-col border-r border-line bg-rail text-foam md:flex">
       <div className="flex h-[4.25rem] items-center gap-3 border-b border-line px-5">
         <BrandMark />
         <div className="min-w-0">
@@ -26,37 +34,38 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="mt-3 flex flex-1 flex-col gap-0.5 px-3">
-        <p className="bank-section-title px-2 pb-2 pt-2">Menú</p>
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            end={link.end}
-            className={({ isActive }) =>
-              [
-                'border-l-2 px-3 py-2.5 text-[0.875rem] font-medium transition-colors',
-                isActive
-                  ? 'border-signal bg-ledger text-foam'
-                  : 'border-transparent text-mute hover:bg-ledger/70 hover:text-foam',
-              ].join(' ')
-            }
-          >
-            {link.label}
-          </NavLink>
-        ))}
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4" aria-label="Principal">
+        <div>
+          <p className="bank-section-title px-3 pb-2">Principal</p>
+          <div className="flex flex-col gap-0.5">
+            {primaryNav.map((item) => (
+              <NavItemLink key={item.to} item={item} />
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="bank-section-title px-3 pb-2">Más</p>
+          <div className="flex flex-col gap-0.5">
+            {secondaryNav.map((item) => (
+              <NavItemLink key={item.to} item={item} />
+            ))}
+          </div>
+        </div>
       </nav>
 
-      <div className="space-y-3 border-t border-line p-4">
-        <button type="button" className="btn-secondary w-full !py-2 text-[0.7rem]" onClick={toggleTheme}>
-          {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-        </button>
-        <div>
-          <p className="bank-section-title">Sesión</p>
-          <NavLink to="/profile" className="mt-1 block text-sm font-medium text-foam hover:text-signal">
-            Cuenta y preferencias
-          </NavLink>
-        </div>
+      <div className="border-t border-line px-5 py-4">
+        <NavLink
+          to={profileNav.to}
+          className={({ isActive }) =>
+            [
+              'text-sm transition-colors',
+              isActive ? 'font-semibold text-foam' : 'text-mute hover:text-foam',
+            ].join(' ')
+          }
+        >
+          {profileNav.label}
+        </NavLink>
       </div>
     </aside>
   )

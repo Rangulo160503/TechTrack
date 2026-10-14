@@ -37,3 +37,19 @@ export function IconMoon({ className = 'h-4 w-4' }: IconProps) {
     </svg>
   )
 }
+
+export function IconChevronLeft({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14.5 6 9 12l5.5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+    </svg>
+  )
+}
+
+export function IconChevronRight({ className = 'h-4 w-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9.5 6 15 12l-5.5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+    </svg>
+  )
+}

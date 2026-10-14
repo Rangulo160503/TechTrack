@@ -8,13 +8,21 @@ public sealed record SelfHostInfo(
     string IpAddress,
     string? MacAddress,
     string Hostname,
-    string? Vendor = null);
+    string? Vendor = null,
+    string? OsVersion = null,
+    string? HardwareProfileJson = null);
 
 public static class SelfHostResolver
 {
     public static SelfHostInfo? TryResolve()
     {
         var hostname = Environment.MachineName;
+        string? osVersion = null;
+        string? hardwareJson = null;
+        if (OperatingSystem.IsWindows())
+        {
+            (osVersion, hardwareJson) = SystemProfileCollector.TryCollect();
+        }
 
         foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
         {
@@ -36,7 +44,13 @@ public static class SelfHostResolver
                     continue;
                 }
 
-                return new SelfHostInfo(uni.Address.ToString(), mac, hostname, "Windows");
+                return new SelfHostInfo(
+                    uni.Address.ToString(),
+                    mac,
+                    hostname,
+                    "Windows",
+                    osVersion,
+                    hardwareJson);
             }
         }
 

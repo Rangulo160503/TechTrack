@@ -14,5 +14,7 @@ public static class NetworkDeviceMappings
             device.FirstSeenAt,
             device.LastSeenAt,
             device.IsOnline,
-            device.LastSeenByAgentId);
+            device.LastSeenByAgentId,
+            device.OsVersion,
+            device.HardwareProfileJson);
 }

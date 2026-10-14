@@ -7,29 +7,47 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { featuredAssetId, homeRows, seedAssets, seedMaintenances } from './seed'
+import { useHomeLists } from '../homeLists/HomeListsContext'
+import {
+  compileInventoryFromHistory,
+  type AssetOverlay,
+} from './compileFromHistory'
 import type {
   AssetStatus,
   InventoryAsset,
+  InventoryComponent,
   MaintenancePriority,
   MaintenanceRecord,
   MaintenanceType,
 } from './types'
+import { computeCompleteness } from './types'
 
-const STORAGE_KEY = 'techtrack.inventory.v1'
+const OVERLAY_KEY = 'techtrack.inventory.overlays.v2'
+const MANUAL_KEY = 'techtrack.inventory.manual.v1'
 
-type InventoryState = {
-  assets: InventoryAsset[]
-  maintenances: MaintenanceRecord[]
+export type AssetFormPatch = {
+  name?: string
+  code?: string
+  category?: string
+  brand?: string
+  model?: string
+  location?: string
+  serialNumber?: string
+  responsible?: string
+  notes?: string
+  status?: AssetStatus
+  components?: InventoryComponent[]
 }
 
-type CreateAssetInput = {
+export type CreateAssetInput = {
   code: string
   name: string
   category: string
   brand: string
+  model?: string
   location: string
   serialNumber: string
+  responsible?: string
   notes?: string
   status?: AssetStatus
 }
@@ -45,12 +63,10 @@ type CreateMaintenanceInput = {
 type InventoryContextValue = {
   assets: InventoryAsset[]
   maintenances: MaintenanceRecord[]
-  featuredAsset: InventoryAsset
-  rows: { title: string; items: InventoryAsset[] }[]
   getAsset: (id: string) => InventoryAsset | undefined
   searchAssets: (query: string) => InventoryAsset[]
   createAsset: (input: CreateAssetInput) => InventoryAsset
-  updateAsset: (id: string, patch: Partial<InventoryAsset>) => void
+  updateAsset: (id: string, patch: AssetFormPatch) => void
   createMaintenance: (input: CreateMaintenanceInput) => MaintenanceRecord
   completeMaintenance: (id: string) => void
   resetInventory: () => void
@@ -58,28 +74,25 @@ type InventoryContextValue = {
 
 const InventoryContext = createContext<InventoryContextValue | null>(null)
 
-function loadState(): InventoryState {
+function loadOverlays(): Record<string, AssetOverlay> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      return {
-        assets: structuredClone(seedAssets),
-        maintenances: structuredClone(seedMaintenances),
-      }
-    }
-    const parsed = JSON.parse(raw) as InventoryState
-    if (!Array.isArray(parsed.assets) || !Array.isArray(parsed.maintenances)) {
-      return {
-        assets: structuredClone(seedAssets),
-        maintenances: structuredClone(seedMaintenances),
-      }
-    }
-    return parsed
+    const raw = localStorage.getItem(OVERLAY_KEY) ?? localStorage.getItem('techtrack.inventory.overlays.v1')
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as Record<string, AssetOverlay>
+    return parsed && typeof parsed === 'object' ? parsed : {}
   } catch {
-    return {
-      assets: structuredClone(seedAssets),
-      maintenances: structuredClone(seedMaintenances),
-    }
+    return {}
+  }
+}
+
+function loadManual(): InventoryAsset[] {
+  try {
+    const raw = localStorage.getItem(MANUAL_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as InventoryAsset[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
 }
 
@@ -93,57 +106,128 @@ function randomTone(): string {
   return tones[Math.floor(Math.random() * tones.length)]!
 }
 
+function patchToOverlay(patch: AssetFormPatch): AssetOverlay {
+  const next: AssetOverlay = {}
+  if (patch.name !== undefined) next.displayName = patch.name
+  if (patch.code !== undefined) next.code = patch.code
+  if (patch.category !== undefined) next.category = patch.category
+  if (patch.brand !== undefined) next.brand = patch.brand
+  if (patch.model !== undefined) next.model = patch.model
+  if (patch.location !== undefined) next.location = patch.location
+  if (patch.serialNumber !== undefined) next.serialNumber = patch.serialNumber
+  if (patch.responsible !== undefined) next.responsible = patch.responsible
+  if (patch.notes !== undefined) next.notes = patch.notes
+  if (patch.status !== undefined) next.status = patch.status
+  if (patch.components !== undefined) next.components = patch.components
+  return next
+}
+
 export function InventoryProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<InventoryState>(() => loadState())
+  const { lists, archives } = useHomeLists()
+  const [overlays, setOverlays] = useState<Record<string, AssetOverlay>>(() => loadOverlays())
+  const [manualAssets, setManualAssets] = useState<InventoryAsset[]>(() => loadManual())
+  const [maintenances, setMaintenances] = useState<MaintenanceRecord[]>([])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [state])
+    localStorage.setItem(OVERLAY_KEY, JSON.stringify(overlays))
+  }, [overlays])
 
-  const getAsset = useCallback(
-    (id: string) => state.assets.find((a) => a.id === id),
-    [state.assets],
+  useEffect(() => {
+    localStorage.setItem(MANUAL_KEY, JSON.stringify(manualAssets))
+  }, [manualAssets])
+
+  const assets = useMemo(
+    () => compileInventoryFromHistory(lists, archives, overlays, manualAssets),
+    [lists, archives, overlays, manualAssets],
   )
+
+  const getAsset = useCallback((id: string) => assets.find((a) => a.id === id), [assets])
 
   const searchAssets = useCallback(
     (query: string) => {
       const q = query.trim().toLowerCase()
-      if (!q) return state.assets
-      return state.assets.filter((a) =>
-        [a.code, a.name, a.category, a.brand, a.location, a.serialNumber, a.status]
+      if (!q) return assets
+      return assets.filter((a) =>
+        [
+          a.code,
+          a.name,
+          a.category,
+          a.brand,
+          a.model,
+          a.location,
+          a.serialNumber,
+          a.responsible,
+          a.status,
+          a.macAddress,
+          a.ipAddress,
+          a.osVersion,
+        ]
+          .filter(Boolean)
           .join(' ')
           .toLowerCase()
           .includes(q),
       )
     },
-    [state.assets],
+    [assets],
   )
 
   const createAsset = useCallback((input: CreateAssetInput) => {
-    const asset: InventoryAsset = {
-      id: `a-${crypto.randomUUID().slice(0, 8)}`,
+    const id = `manual-${crypto.randomUUID().slice(0, 8)}`
+    const draft = {
       code: input.code.trim(),
       name: input.name.trim(),
       category: input.category.trim(),
       brand: input.brand.trim(),
-      location: input.location.trim(),
+      model: input.model?.trim() ?? '',
       serialNumber: input.serialNumber.trim(),
-      notes: input.notes?.trim() ?? '',
+      location: input.location.trim(),
       status: input.status ?? 'Operational',
+    }
+    const asset: InventoryAsset = {
+      id,
+      ...draft,
+      responsible: input.responsible?.trim() ?? '',
+      notes: input.notes?.trim() ?? '',
       tone: randomTone(),
       updatedAt: new Date().toISOString(),
+      isManual: true,
+      components: [],
+      completeness: computeCompleteness(draft),
     }
-    setState((prev) => ({ ...prev, assets: [asset, ...prev.assets] }))
+    setManualAssets((prev) => [asset, ...prev])
     return asset
   }, [])
 
-  const updateAsset = useCallback((id: string, patch: Partial<InventoryAsset>) => {
-    setState((prev) => ({
+  const updateAsset = useCallback((id: string, patch: AssetFormPatch) => {
+    const overlayPatch = patchToOverlay(patch)
+    setOverlays((prev) => ({
       ...prev,
-      assets: prev.assets.map((a) =>
-        a.id === id ? { ...a, ...patch, updatedAt: new Date().toISOString() } : a,
-      ),
+      [id]: { ...prev[id], ...overlayPatch },
     }))
+    setManualAssets((prev) =>
+      prev.map((a) => {
+        if (a.id !== id) return a
+        const next = {
+          ...a,
+          name: patch.name ?? a.name,
+          code: patch.code ?? a.code,
+          category: patch.category ?? a.category,
+          brand: patch.brand ?? a.brand,
+          model: patch.model ?? a.model,
+          location: patch.location ?? a.location,
+          serialNumber: patch.serialNumber ?? a.serialNumber,
+          responsible: patch.responsible ?? a.responsible,
+          notes: patch.notes ?? a.notes,
+          status: patch.status ?? a.status,
+          components: patch.components ?? a.components,
+          updatedAt: new Date().toISOString(),
+        }
+        return {
+          ...next,
+          completeness: computeCompleteness(next),
+        }
+      }),
+    )
   }, [])
 
   const createMaintenance = useCallback((input: CreateMaintenanceInput) => {
@@ -157,55 +241,46 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       status: 'Open',
       createdAt: new Date().toISOString(),
     }
-    setState((prev) => ({
-      assets: prev.assets.map((a) =>
-        a.id === input.assetId
-          ? { ...a, status: 'InMaintenance', updatedAt: new Date().toISOString() }
-          : a,
-      ),
-      maintenances: [record, ...prev.maintenances],
+    setMaintenances((prev) => [record, ...prev])
+    setOverlays((prev) => ({
+      ...prev,
+      [input.assetId]: { ...prev[input.assetId], status: 'InMaintenance' },
     }))
     return record
   }, [])
 
   const completeMaintenance = useCallback((id: string) => {
-    setState((prev) => {
-      const target = prev.maintenances.find((m) => m.id === id)
+    setMaintenances((prev) => {
+      const target = prev.find((m) => m.id === id)
       if (!target) return prev
-      const maintenances = prev.maintenances.map((m) =>
+      const next = prev.map((m) =>
         m.id === id
           ? { ...m, status: 'Completed' as const, completedAt: new Date().toISOString() }
           : m,
       )
-      const stillOpen = maintenances.some(
+      const stillOpen = next.some(
         (m) => m.assetId === target.assetId && m.status !== 'Completed',
       )
-      return {
-        maintenances,
-        assets: prev.assets.map((a) =>
-          a.id === target.assetId && !stillOpen
-            ? { ...a, status: 'Operational', updatedAt: new Date().toISOString() }
-            : a,
-        ),
+      if (!stillOpen) {
+        setOverlays((o) => ({
+          ...o,
+          [target.assetId]: { ...o[target.assetId], status: 'Operational' },
+        }))
       }
+      return next
     })
   }, [])
 
   const resetInventory = useCallback(() => {
-    setState({
-      assets: structuredClone(seedAssets),
-      maintenances: structuredClone(seedMaintenances),
-    })
+    setOverlays({})
+    setManualAssets([])
+    setMaintenances([])
   }, [])
-
-  const featuredAsset = state.assets.find((a) => a.id === featuredAssetId) ?? state.assets[0]!
 
   const value = useMemo<InventoryContextValue>(
     () => ({
-      assets: state.assets,
-      maintenances: state.maintenances,
-      featuredAsset,
-      rows: homeRows(state.assets),
+      assets,
+      maintenances,
       getAsset,
       searchAssets,
       createAsset,
@@ -215,9 +290,8 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       resetInventory,
     }),
     [
-      state.assets,
-      state.maintenances,
-      featuredAsset,
+      assets,
+      maintenances,
       getAsset,
       searchAssets,
       createAsset,

@@ -1,9 +1,12 @@
 import { NavLink } from 'react-router-dom'
+import { primaryNav } from './nav'
 
-const primaryLinks = [
-  { to: '/', label: 'Inicio', end: true },
-  { to: '/live', label: 'En vivo' },
-  { to: '/assets', label: 'Activos' },
+const mobileLinks = [
+  ...primaryNav.map((item) => ({
+    to: item.to,
+    label: item.shortLabel ?? item.label,
+    end: item.end,
+  })),
   { to: '/more', label: 'Más' },
 ]
 
@@ -15,15 +18,15 @@ export function MobileNav() {
       aria-label="Navegación principal"
     >
       <ul className="grid grid-cols-4">
-        {primaryLinks.map((link) => (
+        {mobileLinks.map((link) => (
           <li key={link.to}>
             <NavLink
               to={link.to}
-              end={link.end}
+              end={'end' in link ? link.end : undefined}
               className={({ isActive }) =>
                 [
-                  'flex min-h-12 flex-col items-center justify-center gap-1 px-1 py-2 text-[0.65rem] font-bold uppercase tracking-[0.08em]',
-                  isActive ? 'text-signal' : 'text-mute',
+                  'flex min-h-12 flex-col items-center justify-center gap-1 px-1 py-2 text-[0.7rem] font-medium tracking-[-0.01em]',
+                  isActive ? 'text-foam' : 'text-mute',
                 ].join(' ')
               }
             >
@@ -31,12 +34,12 @@ export function MobileNav() {
                 <>
                   <span
                     className={[
-                      'h-[2px] w-5',
+                      'h-[2px] w-4',
                       isActive ? 'bg-signal' : 'bg-transparent',
                     ].join(' ')}
                     aria-hidden
                   />
-                  {link.label}
+                  <span className={isActive ? 'font-semibold' : undefined}>{link.label}</span>
                 </>
               )}
             </NavLink>

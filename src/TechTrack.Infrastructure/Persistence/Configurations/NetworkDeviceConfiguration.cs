@@ -25,6 +25,11 @@ public sealed class NetworkDeviceConfiguration : IEntityTypeConfiguration<Networ
         builder.Property(x => x.Vendor)
             .HasMaxLength(NetworkDevice.VendorMaxLength);
 
+        builder.Property(x => x.OsVersion)
+            .HasMaxLength(NetworkDevice.OsVersionMaxLength);
+
+        builder.Property(x => x.HardwareProfileJson);
+
         builder.Property(x => x.LastSeenByAgentId)
             .HasMaxLength(NetworkDevice.AgentIdMaxLength)
             .IsRequired();
@@ -43,9 +48,8 @@ public sealed class NetworkDeviceConfiguration : IEntityTypeConfiguration<Networ
             .IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
 
-        builder.HasIndex(x => x.MacAddress)
-            .IsUnique()
-            .HasFilter("[MacAddress] IS NOT NULL");
+        // Único por MAC. Sin filtro SQL Server-only para compatibilidad con SQLite.
+        builder.HasIndex(x => x.MacAddress).IsUnique();
 
         builder.HasIndex(x => x.IpAddress);
         builder.HasIndex(x => new { x.IsOnline, x.LastSeenAt });

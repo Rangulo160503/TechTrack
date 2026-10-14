@@ -27,7 +27,7 @@ public sealed class LocalSendOptions
 
     public string DeviceModel { get; set; } = "TechTrack API";
 
-    public int OfflineAfterSeconds { get; set; } = 90;
+    public int OfflineAfterSeconds { get; set; } = 45;
 
-    public int OfflineCheckIntervalSeconds { get; set; } = 15;
+    public int OfflineCheckIntervalSeconds { get; set; } = 10;
 }

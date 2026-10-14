@@ -1,11 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { startTransition, useCallback, useState } from 'react'
 import { fetchNetworkDevices } from '../api/network'
-import { LiveFloorPlan } from '../components/live/LiveFloorPlan'
 import { usePresenceHub } from '../hooks/usePresenceHub'
 import type { NetworkDevice } from '../types/network'
-
-type LiveViewMode = 'list' | 'map'
 
 function formatSeen(iso: string): string {
   try {
@@ -30,7 +27,6 @@ function mergeDevice(prev: NetworkDevice[], device: NetworkDevice): NetworkDevic
 
 export function LivePage() {
   const [liveDevices, setLiveDevices] = useState<NetworkDevice[] | null>(null)
-  const [viewMode, setViewMode] = useState<LiveViewMode>('list')
 
   const snapshotQuery = useQuery({
     queryKey: ['network-devices'],
@@ -58,39 +54,14 @@ export function LivePage() {
   return (
     <div className="px-4 pt-4 md:px-8 md:pt-6">
       <header className="mb-5 border-b border-line pb-5 md:mb-7">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="max-w-3xl">
-            <p className="bank-section-title text-signal">Presencia en red</p>
-            <h1 className="mt-2 font-display text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-foam md:text-[2.5rem]">
-              En vivo
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-mute md:text-[0.95rem]">
-              Equipos anunciados por Presence Client en esta WiFi, sin abrir nada en el teléfono.
-            </p>
-          </div>
-
-          <div className="inline-flex border border-line" role="group" aria-label="Vista">
-            <button
-              type="button"
-              className={[
-                'px-3 py-2 text-[0.65rem] font-bold uppercase tracking-[0.08em]',
-                viewMode === 'list' ? 'bg-foam text-ink' : 'bg-panel text-mute hover:text-foam',
-              ].join(' ')}
-              onClick={() => setViewMode('list')}
-            >
-              Listado
-            </button>
-            <button
-              type="button"
-              className={[
-                'border-l border-line px-3 py-2 text-[0.65rem] font-bold uppercase tracking-[0.08em]',
-                viewMode === 'map' ? 'bg-foam text-ink' : 'bg-panel text-mute hover:text-foam',
-              ].join(' ')}
-              onClick={() => setViewMode('map')}
-            >
-              Croquis
-            </button>
-          </div>
+        <div className="max-w-3xl">
+          <p className="bank-section-title text-signal">Presencia en red</p>
+          <h1 className="mt-2 font-display text-[1.75rem] font-bold leading-tight tracking-[-0.03em] text-foam md:text-[2.5rem]">
+            Equipos en vivo
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-mute md:text-[0.95rem]">
+            Equipos anunciados por Presence Client en esta WiFi, sin abrir nada en el teléfono.
+          </p>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -124,8 +95,6 @@ export function LivePage() {
           Aún no hay equipos. Ejecutá{' '}
           <code className="text-foam">TechTrack.PresenceClient</code> en las PCs de la red.
         </div>
-      ) : viewMode === 'map' ? (
-        <LiveFloorPlan devices={devices} />
       ) : (
         <ul className="bank-card divide-y divide-line overflow-hidden">
           {devices.map((device) => (
