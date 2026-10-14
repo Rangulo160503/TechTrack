@@ -1,17 +1,27 @@
 # TechTrack — CTP Santa Eulalia
 
-## Primera vez
+## PC nueva (desde cero)
+
+1. Descargá el ZIP del repo (no hace falta tener Git todavía):  
+   https://github.com/Rangulo160503/TechTrack/archive/refs/heads/main.zip  
+2. Extraelo en `Documents` (carpeta **sin espacios**).  
+3. Doble clic en **`INSTALAR.bat`** (Git, .NET 10, Node, cloudflared + npm install).  
+4. Si pide cerrar la terminal: abrí una nueva y volvé a ejecutar `INSTALAR.bat`.  
+5. Doble clic en **`REFRESH.bat`**.
+
+`REFRESH.bat` genera `PUBLIC_URL.txt` con el link para telefonos.  
+Ctrl+C en esa ventana detiene todo.
+
+## Ya tenés Git
 
 ```powershell
 cd $env:USERPROFILE\Documents
 git clone https://github.com/Rangulo160503/TechTrack.git TechTrack
 cd TechTrack
-powershell -ExecutionPolicy Bypass -File .\scripts\install-dev-tools.ps1
+.\INSTALAR.bat
+.\REFRESH.bat
 ```
 
-## Cada vez (link nuevo)
+## Requisitos previos de Windows
 
-Doble clic en **`REFRESH.bat`**
-
-Eso hace pull, reinicia todo y abre `PUBLIC_URL.txt` con el link para telefonos.  
-Ctrl+C en la ventana negra detiene todo.
+- Windows 10/11 con **winget** (App Installer / Instalador de aplicaciones).

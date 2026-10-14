@@ -97,18 +97,26 @@ function Stop-AllChildren {
     Write-Host "  Listo."
 }
 
-# Resolve npm.cmd on Windows
+# Ensure required tools exist (installs via winget if missing).
+$ensure = Join-Path $PSScriptRoot "ensure-tools.ps1"
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ensure
+if ($LASTEXITCODE -ne 0) {
+    throw "Faltan herramientas. Ejecuta INSTALAR.bat y abre una terminal nueva."
+}
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+    [System.Environment]::GetEnvironmentVariable("Path", "User")
+
 $npmCmd = Get-Command npm.cmd -ErrorAction SilentlyContinue
 if (-not $npmCmd) { $npmCmd = Get-Command npm -ErrorAction SilentlyContinue }
-if (-not $npmCmd) { throw "npm no encontrado. Ejecuta .\scripts\install-dev-tools.ps1" }
+if (-not $npmCmd) { throw "npm no encontrado. Ejecuta INSTALAR.bat" }
 $npm = $npmCmd.Source
 
 $dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
-if (-not $dotnetCmd) { throw "dotnet no encontrado. Ejecuta .\scripts\install-dev-tools.ps1" }
+if (-not $dotnetCmd) { throw "dotnet no encontrado. Ejecuta INSTALAR.bat" }
 $dotnet = $dotnetCmd.Source
 
 $cloudflaredCmd = Get-Command cloudflared -ErrorAction SilentlyContinue
-if (-not $cloudflaredCmd) { throw "cloudflared no encontrado. Ejecuta .\scripts\install-dev-tools.ps1" }
+if (-not $cloudflaredCmd) { throw "cloudflared no encontrado. Ejecuta INSTALAR.bat" }
 $cloudflared = $cloudflaredCmd.Source
 
 Write-Host "========================================"
