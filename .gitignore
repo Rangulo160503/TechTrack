@@ -37,9 +37,10 @@ Thumbs.db
 # Docker
 docker-volumes/
 
-# Markdown: solo se versiona el README de la raíz del repo
+# Markdown: README raíz + guía de desarrollo local
 *.md
 !/README.md
+!/docs/**/*.md
 
 # Logs de arranque local
 logs/
