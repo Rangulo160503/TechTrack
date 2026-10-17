@@ -7,8 +7,9 @@ echo.
 echo ========================================
 echo  TechTrack - REFRESH
 echo ========================================
-echo  Comprueba herramientas, actualiza, arranca
-echo  y genera link nuevo para telefonos.
+echo  Comprueba herramientas, hace git pull,
+echo  arranca y genera link nuevo para telefonos.
+echo  Tip: ACTUALIZAR.bat solo descarga cambios.
 echo ========================================
 echo.
 

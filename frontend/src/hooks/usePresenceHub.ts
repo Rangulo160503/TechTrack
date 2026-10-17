@@ -56,9 +56,17 @@ export function usePresenceHub(
       try {
         await connection.start()
         if (!cancelled) {
-          setConnectionState('connected')
+          // Only mark connected after start() resolves successfully.
+          setConnectionState(
+            connection.state === HubConnectionState.Connected ? 'connected' : 'disconnected',
+          )
         }
-      } catch {
+      } catch (err) {
+        console.error(
+          `[TechTrack] SignalR no pudo conectar a ${resolveHubUrl()}. ` +
+            'Comprueba que la API este en :5176 y que el proxy Vite /hubs (ws) este activo.',
+          err,
+        )
         if (!cancelled) {
           setConnectionState('disconnected')
         }
